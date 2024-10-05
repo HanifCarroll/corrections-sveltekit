@@ -28,16 +28,14 @@ const handleSubmit = async (e: SubmitEvent) => {
 		currentUser.set(response.data);
 		goto("/posts");
 	} catch (error) {
-		if (error instanceof AxiosError) {
-			if (error.response?.data?.errors) {
-				errors = {
-					name: error.response.data.errors.name || [],
-					email: error.response.data.errors.email || [],
-					password: error.response.data.errors.password || [],
-					passwordConfirmation:
-						error.response.data.errors.password_confirmation || [],
-				};
-			}
+		if (error instanceof AxiosError && error.response?.data?.errors) {
+			errors = {
+                name: error.response.data.errors.name || [],
+                email: error.response.data.errors.email || [],
+				password: error.response.data.errors.password || [],
+				passwordConfirmation:
+					error.response.data.errors.password_confirmation || [],
+			};
 		}
 	}
 };
