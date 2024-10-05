@@ -12,13 +12,13 @@ let loggedInUser: CurrentUser | null = null;
 $: loggedInUser = $currentUser;
 
 async function logout() {
+	currentUser.set({
+		name: "",
+		email: "",
+		authToken: "",
+	});
 	try {
 		await apiClient.post("/logout");
-		currentUser.set({
-			name: "",
-			email: "",
-			authToken: "",
-		});
 		goto("/");
 	} catch (error) {
 		console.error("Logout failed:", error);
