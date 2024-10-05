@@ -6,8 +6,10 @@ export const load: PageServerLoad = async ({ params }) => {
 		const { postId, correctionId } = params;
 		const [post, correction] = await Promise.all([
 			apiClient.get(`/posts/${postId}`),
-			apiClient.get(`/corrections/${correctionId}`)
+			apiClient.get(`/corrections/${correctionId}`),
 		]);
+		console.log('Post data:', post.data);
+		console.log('Correction data:', correction.data);
 		return {
 			post: post.data,
 			correction: correction.data,

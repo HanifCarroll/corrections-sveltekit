@@ -5,6 +5,31 @@ import Button from "$components/Button.svelte";
 import { apiClient } from "$lib/apiClient";
 import { currentUser } from "$lib/store";
 import { get } from "svelte/store";
+interface Post {
+	id: string;
+	user_id: string;
+	title: string;
+	text: string;
+	created_at: string;
+	updated_at: string;
+	user: {
+		id: string;
+		name: string;
+	};
+	sentences: {
+		id: string;
+		post_id: string;
+		sentence_number: number;
+		text: string;
+	}[];
+	corrections: {
+		id: string;
+		post_id: string;
+		user_id: string;
+		user: object;
+		correction_sentences: any[];
+	}[];
+}
 
 interface PostSentence {
 	id: string;
@@ -30,6 +55,7 @@ interface Correction {
 }
 
 let correction: Correction = $page.data.correction;
+let post: Post = $page.data.post;
 let loggedInUser = get(currentUser);
 
 async function deleteCorrection() {
@@ -55,12 +81,12 @@ async function deleteCorrection() {
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-semibold mb-4">Original Post</h3>
-                    <p class="mb-6">{correction.post.text}</p>
+                    <p class="mb-6">{post.text}</p>
     
                     <h3 class="text-lg font-semibold mb-4">Corrections</h3>
-                    {#each correction.post.sentences as postSentence}
+                    {#each post.sentences as postSentence}
                         {@const correctionSentence = correction.correction_sentences.find(cs => cs.post_sentence_id === postSentence.id)}
-                        {@const isCorrected = correctionSentence?.corrected_text !== postSentence.text}
+                        {@const isCorrected = correctionSentence && correctionSentence.corrected_text !== postSentence.text}
                         <div class="mb-6 p-4 border rounded {isCorrected ? 'bg-yellow-50 dark:bg-yellow-900 border-yellow-300 dark:border-yellow-600' : 'bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-600'}">
                             <div class="mb-2">
                                 <label class="block text-sm font-medium {isCorrected ? 'text-yellow-700 dark:text-yellow-300' : 'text-green-700 dark:text-green-300'}">
