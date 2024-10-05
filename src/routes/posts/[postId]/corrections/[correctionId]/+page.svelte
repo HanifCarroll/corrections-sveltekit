@@ -27,7 +27,12 @@ interface Post {
 		post_id: string;
 		user_id: string;
 		user: object;
-		correction_sentences: any[];
+		correction_sentences: {
+			id: string;
+			post_sentence_id: string;
+			corrected_text: string;
+			explanation: string;
+		}[];
 	}[];
 }
 
