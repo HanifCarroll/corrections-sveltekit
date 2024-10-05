@@ -17,10 +17,13 @@ const handleSubmit = async (e: SubmitEvent) => {
 			password,
 		});
 		currentUser.set({
+			id: response.data.id,
 			name: response.data.name,
 			email: response.data.email,
 			authToken: response.data.token,
 		});
+		// Set the auth token as a cookie
+		document.cookie = `authToken=${response.data.token}; path=/; max-age=86400; SameSite=Strict; Secure`;
 		goto("/posts");
 	} catch (error) {
 		if (error instanceof AxiosError) {

@@ -13,10 +13,13 @@ $: loggedInUser = $currentUser;
 
 async function logout() {
 	currentUser.set({
+		id: "",
 		name: "",
 		email: "",
 		authToken: "",
 	});
+	// Remove the auth token cookie
+	document.cookie = "authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict; Secure";
 	try {
 		await apiClient.post("/logout");
 		goto("/");
