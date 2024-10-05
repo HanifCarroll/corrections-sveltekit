@@ -15,7 +15,6 @@ let errors = {
 	password: [],
 	passwordConfirmation: [],
 };
-let status = "";
 
 const handleSubmit = async (e: SubmitEvent) => {
 	e.preventDefault();
@@ -46,12 +45,6 @@ const handleSubmit = async (e: SubmitEvent) => {
 
 <div class="w-11/12 md:w-1/2 p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mx-auto">
     <form on:submit={handleSubmit}>
-        <!-- Session Status -->
-        {#if status}
-            <div class="mb-4 text-green-600">
-                {status}
-            </div>
-        {/if}
 
         <!-- Name -->
         <div>
