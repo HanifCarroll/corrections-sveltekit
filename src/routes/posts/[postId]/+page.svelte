@@ -1,7 +1,6 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
-import Button from "$components/Button.svelte";
 import { apiClient } from "$lib/apiClient";
 import { type CurrentUser, currentUser } from "$lib/store";
 import { get } from "svelte/store";

@@ -3,7 +3,7 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params }) => {
 	try {
-		const response = await apiClient.get(`/posts/${params.id}`);
+		const response = await apiClient.get(`/posts/${params.postId}`);
 		return {
 			post: response.data,
 		};
