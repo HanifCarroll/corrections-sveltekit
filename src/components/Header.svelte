@@ -1,57 +1,55 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
-  import { onMount, createEventDispatcher } from 'svelte';
-  import { scale } from 'svelte/transition';
-  import { axiosClient } from '$lib/axios';
+import { goto } from "$app/navigation";
+import { page } from "$app/stores";
+import { apiClient } from "$lib/apiClient";
+import { type CurrentUser, currentUser } from "$lib/store";
+import { createEventDispatcher } from "svelte";
+import { scale } from "svelte/transition";
 
-  let open = false;
-  let user: { name: string; email: string } | null = null;
-  let dropdownOpen = false;
+let open = false;
+let dropdownOpen = false;
+let loggedInUser: CurrentUser | null = null;
+$: loggedInUser = $currentUser;
 
-  onMount(async () => {
-    try {
-      const response = await axiosClient.get('/user');
-      user = response.data;
-    } catch (error) {
-      user = null;
-    }
-  });
+async function logout() {
+	try {
+		await apiClient.post("/logout");
+		currentUser.set({
+			name: "",
+			email: "",
+			authToken: "",
+		});
+		goto("/");
+	} catch (error) {
+		console.error("Logout failed:", error);
+	}
+}
 
-  async function logout() {
-    try {
-      await axiosClient.post('/logout');
-      goto('/');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  }
+function handleClickOutside(event: MouseEvent) {
+	const target = event.target as HTMLElement;
+	if (dropdownOpen && !target?.closest(".dropdown")) {
+		dropdownOpen = false;
+	}
+}
 
-  function handleClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (dropdownOpen && !target?.closest('.dropdown')) {
-      dropdownOpen = false;
-    }
-  }
+const dispatch = createEventDispatcher();
 
-  const dispatch = createEventDispatcher();
+function closeDropdown() {
+	dropdownOpen = false;
+	dispatch("close");
+}
 
-  function closeDropdown() {
-    dropdownOpen = false;
-    dispatch('close');
-  }
+function navLinkClass(active: boolean) {
+	return active
+		? "inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 dark:border-indigo-600 text-sm font-medium leading-5 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out"
+		: "inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:outline-none focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700 transition duration-150 ease-in-out";
+}
 
-  function navLinkClass(active: boolean) {
-    return active
-      ? 'inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 dark:border-indigo-600 text-sm font-medium leading-5 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out'
-      : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:outline-none focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700 transition duration-150 ease-in-out';
-  }
-
-  function responsiveNavLinkClass(active: boolean) {
-    return active
-      ? 'block w-full ps-3 pe-4 py-2 border-l-4 border-indigo-400 dark:border-indigo-600 text-start text-base font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/50 focus:outline-none focus:text-indigo-800 dark:focus:text-indigo-200 focus:bg-indigo-100 dark:focus:bg-indigo-900 focus:border-indigo-700 dark:focus:border-indigo-300 transition duration-150 ease-in-out'
-      : 'block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:text-gray-800 dark:focus:text-gray-200 focus:bg-gray-50 dark:focus:bg-gray-700 focus:border-gray-300 dark:focus:border-gray-600 transition duration-150 ease-in-out';
-  }
+function responsiveNavLinkClass(active: boolean) {
+	return active
+		? "block w-full ps-3 pe-4 py-2 border-l-4 border-indigo-400 dark:border-indigo-600 text-start text-base font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/50 focus:outline-none focus:text-indigo-800 dark:focus:text-indigo-200 focus:bg-indigo-100 dark:focus:bg-indigo-900 focus:border-indigo-700 dark:focus:border-indigo-300 transition duration-150 ease-in-out"
+		: "block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:text-gray-800 dark:focus:text-gray-200 focus:bg-gray-50 dark:focus:bg-gray-700 focus:border-gray-300 dark:focus:border-gray-600 transition duration-150 ease-in-out";
+}
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -81,11 +79,11 @@
 
       <!-- Settings Dropdown or Login/Register Links -->
       <div class="hidden sm:flex sm:items-center sm:ms-6">
-        {#if user}
+        {#if loggedInUser.name}
           <div class="relative dropdown">
             <div on:click={() => dropdownOpen = !dropdownOpen}>
               <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                <div>{user.name}</div>
+                <div>{loggedInUser.name}</div>
 
                 <div class="ms-1">
                   <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -147,10 +145,10 @@
 
     <!-- Responsive Settings Options or Login/Register Links -->
     <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-      {#if user}
+      {#if loggedInUser.name}
         <div class="px-4">
-          <div class="font-medium text-base text-gray-800 dark:text-gray-200">{user.name}</div>
-          <div class="font-medium text-sm text-gray-500">{user.email}</div>
+          <div class="font-medium text-base text-gray-800 dark:text-gray-200">{loggedInUser.name}</div>
+          <div class="font-medium text-sm text-gray-500">{loggedInUser.email}</div>
         </div>
 
         <div class="mt-3 space-y-1">

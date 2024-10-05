@@ -1,6 +1,10 @@
 <script lang="ts">
+import { goto } from "$app/navigation";
 import Button from "$components/Button.svelte";
-import { onMount } from "svelte";
+import { apiClient } from "$lib";
+import { currentUser } from "$lib/store";
+import { AxiosError } from "axios";
+
 let name = "";
 let email = "";
 let password = "";
@@ -15,12 +19,29 @@ let status = "";
 
 const handleSubmit = async (e: SubmitEvent) => {
 	e.preventDefault();
-	// Handle registration form submission logic here
+	try {
+		const response = await apiClient.post("/register", {
+			name,
+			email,
+			password,
+			password_confirmation: passwordConfirmation,
+		});
+		currentUser.set(response.data);
+		goto("/posts");
+	} catch (error) {
+		if (error instanceof AxiosError) {
+			if (error.response?.data?.errors) {
+				errors = {
+					name: error.response.data.errors.name || [],
+					email: error.response.data.errors.email || [],
+					password: error.response.data.errors.password || [],
+					passwordConfirmation:
+						error.response.data.errors.password_confirmation || [],
+				};
+			}
+		}
+	}
 };
-
-onMount(() => {
-	// Fetch session status and errors if needed
-});
 </script>
 
 <div class="w-11/12 md:w-1/2 p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mx-auto">
